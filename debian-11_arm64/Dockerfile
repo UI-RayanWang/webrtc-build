@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:experimental
-FROM debian:bullseye
+FROM ubuntu:20.04
 
 ARG PACKAGE_NAME=debian-11_arm64
 ARG DEBIAN_FRONTEND=noninteractive
@@ -10,8 +10,8 @@ RUN dpkg --configure -a
 
 RUN apt-get update && apt-get install -qy apt-utils gnupg2
 
-RUN printf "adding arm64 to dpkg...\n" && \
-    dpkg --add-architecture arm64
+#RUN printf "adding arm64 to dpkg...\n" && \
+#    dpkg --add-architecture arm64
 
 RUN printf "installing packages...\n" && \
     apt-get update && \
@@ -45,5 +45,4 @@ ENV LC_ALL=C.UTF-8
 
 #FROM ubuntu:20.04
 #COPY --from=builder /webrtc.tar.gz /
-
-
+CMD ["/bin/bash"]

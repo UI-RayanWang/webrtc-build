@@ -260,6 +260,7 @@ PATCHES = {
         'ssl_verify_callback_with_native_handle.patch',
     ],
     'debian-11_arm64': [
+        'add_dep_json.patch',
         '4k.patch',
         'add_license_dav1d.patch',
         'ssl_verify_callback_with_native_handle.patch',
@@ -363,7 +364,7 @@ MULTISTRAP_CONFIGS = {
         config_file=['ubuntu-18.04_armv8', 'arm64.conf'],
         arch='arm64',
         triplet='aarch64-linux-gnu'
-    )
+    ),
     'debian-11_arm64': MultistrapConfig(
         config_file=['debian-11_arm64', 'arm64.conf'],
         arch='arm64',
@@ -427,8 +428,8 @@ WEBRTC_BUILD_TARGETS = {
 
 def get_build_targets(target):
     ts = [':default']
-    if target not in ('windows_x86_64', 'windows_arm64', 'ios', 'macos_x86_64', 'macos_arm64'):
-        ts += ['buildtools/third_party/libc++']
+    #if target not in ('windows_x86_64', 'windows_arm64', 'ios', 'macos_x86_64', 'macos_arm64'):
+    #    ts += ['buildtools/third_party/libc++']
     ts += WEBRTC_BUILD_TARGETS.get(target, [])
     return ts
 
@@ -693,10 +694,10 @@ def build_webrtc(
                 f'target_sysroot="{sysroot}"',
                 'rtc_use_pipewire=false',
                 'is_debug=true',
-                'is_clang=true'.
+                'is_clang=true',
                 'use_custom_libcxx_for_host=false',
                 'use_custom_libcxx=false',
-                'rtc_include_tests=false'
+                'rtc_include_tests=false',
                 'treat_warnings_as_errors=false',
                 'use_glib=false'
             ]
