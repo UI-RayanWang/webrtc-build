@@ -258,6 +258,11 @@ PATCHES = {
         '4k.patch',
         'add_license_dav1d.patch',
         'ssl_verify_callback_with_native_handle.patch',
+    ],
+    'debian-11_arm64': [
+        '4k.patch',
+        'add_license_dav1d.patch',
+        'ssl_verify_callback_with_native_handle.patch',
     ]
 }
 
@@ -273,8 +278,10 @@ def apply_patch(patch, dir, depth):
                 cmd(['patch', f'-p{depth}'], stdin=stdin)
 
 
-def get_webrtc(source_dir, patch_dir, version, target,
-               webrtc_source_dir=None, force=False, fetch=False):
+def get_webrtc(source_dir, patch_dir, version, target, webrtc_source_dir=None, force=False, fetch=False):
+    
+    print(f'#-> get_webrtc source_dir={source_dir} patch_dir={patch_dir} version={version} webrtc_source_dir={webrtc_source_dir}')
+    
     if webrtc_source_dir is None:
         webrtc_source_dir = os.path.join(source_dir, 'webrtc')
     if force:
@@ -356,11 +363,17 @@ MULTISTRAP_CONFIGS = {
         config_file=['ubuntu-18.04_armv8', 'arm64.conf'],
         arch='arm64',
         triplet='aarch64-linux-gnu'
+    )
+    'debian-11_arm64': MultistrapConfig(
+        config_file=['debian-11_arm64', 'arm64.conf'],
+        arch='arm64',
+        triplet='aarch64-linux-gnu'
     ),
 }
 
 
 def init_rootfs(sysroot: str, config: MultistrapConfig, force=False):
+    print(f'#-> init_rootfs ${sysroot}')
     if force:
         rm_rf(sysroot)
 
@@ -439,6 +452,9 @@ def gn_gen(webrtc_src_dir: str, webrtc_build_dir: str, gn_args: List[str], extra
 
 
 def get_webrtc_version_info(version_info: VersionInfo):
+    
+    print(f'#-> get_webrtc_version_info')
+    
     xs = version_info.webrtc_version.split('.')
     ys = version_info.webrtc_build_version.split('.')
     if len(xs) >= 3 and len(ys) >= 4:
@@ -452,6 +468,8 @@ def get_webrtc_version_info(version_info: VersionInfo):
         commit = ''
         revision = ''
         maint = ''
+
+    print(f'<-# get_webrtc_version_info  branch=${branch} commit={commit} revision={revision}')
     return [branch, commit, revision, maint]
 
 
@@ -462,6 +480,9 @@ def build_webrtc_ios(
         gen=False, gen_force=False,
         nobuild=False, nobuild_framework=False,
         overlap_build_dir=False):
+    
+    print(f'#-> build_webrtc_ios')
+    
     if webrtc_source_dir is None:
         webrtc_source_dir = os.path.join(source_dir, 'webrtc')
     if webrtc_build_dir is None:
@@ -622,6 +643,9 @@ def build_webrtc(
         debug=False,
         gen=False, gen_force=False,
         nobuild=False, nobuild_macos_framework=False):
+    
+    print(f'#-> build_webrtc() ')
+    
     if webrtc_source_dir is None:
         webrtc_source_dir = os.path.join(source_dir, 'webrtc')
     if webrtc_build_dir is None:
@@ -660,13 +684,21 @@ def build_webrtc(
         elif target in ('raspberry-pi-os_armv6',
                         'raspberry-pi-os_armv7',
                         'raspberry-pi-os_armv8',
-                        'ubuntu-18.04_armv8'):
+                        'ubuntu-18.04_armv8',
+                        'debian-11_arm64' ):
             sysroot = os.path.join(source_dir, 'rootfs')
             gn_args += [
                 'target_os="linux"',
-                f'target_cpu="{"arm64" if target in ("raspberry-pi-os_armv8", "ubuntu-18.04_armv8") else "arm"}"',
+                f'target_cpu="{"arm64" if target in ("raspberry-pi-os_armv8", "ubuntu-18.04_armv8", "debian-11_arm64") else "arm"}"',
                 f'target_sysroot="{sysroot}"',
                 'rtc_use_pipewire=false',
+                'is_debug=true',
+                'is_clang=true'.
+                'use_custom_libcxx_for_host=false',
+                'use_custom_libcxx=false',
+                'rtc_include_tests=false'
+                'treat_warnings_as_errors=false',
+                'use_glib=false'
             ]
             if target == 'raspberry-pi-os_armv6':
                 gn_args += [
@@ -728,7 +760,8 @@ def build_webrtc(
             '-framework', os.path.join(webrtc_build_dir, 'WebRTC.framework'),
              '-debug-symbols', os.path.join(webrtc_build_dir, 'WebRTC.dSYM'),
              '-output', os.path.join(webrtc_build_dir, 'WebRTC.xcframework')])
-
+    
+    print(f'<-# build_webrtc() ')
 
 def copy_headers(webrtc_src_dir, webrtc_package_dir, target):
     if target in ['windows_x86_64', 'windows_arm64']:
@@ -771,6 +804,9 @@ def generate_version_info(webrtc_src_dir, webrtc_package_dir):
 def package_webrtc(source_dir, build_dir, package_dir, target,
                    webrtc_source_dir=None, webrtc_build_dir=None, webrtc_package_dir=None,
                    overlap_ios_build_dir=False):
+    
+    print(f'#-> package_webrtc() ')
+    
     if webrtc_source_dir is None:
         webrtc_source_dir = os.path.join(source_dir, 'webrtc')
     if webrtc_build_dir is None:
@@ -888,6 +924,7 @@ TARGETS = [
     'raspberry-pi-os_armv8',
     'android',
     'ios',
+    'debian-11_arm64'
 ]
 
 
@@ -918,6 +955,7 @@ def check_target(target):
                       'raspberry-pi-os_armv6',
                       'raspberry-pi-os_armv7',
                       'raspberry-pi-os_armv8',
+                      'debian-11_arm64',
                       'android'):
             return True
 
