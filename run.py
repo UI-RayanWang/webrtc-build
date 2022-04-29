@@ -255,6 +255,7 @@ PATCHES = {
         'ssl_verify_callback_with_native_handle.patch',
     ],
     'ubuntu-20.04_x86_64': [
+        'add_dep_json.patch',
         '4k.patch',
         'add_license_dav1d.patch',
         'ssl_verify_callback_with_native_handle.patch',
@@ -335,6 +336,10 @@ VersionInfo = collections.namedtuple('VersionInfo', [
 def archive_objects(ar, dir, output):
     with cd(dir):
         files = cmdcap(['find', '.', '-name', '*.o']).splitlines()
+        
+        # TODO: Make this correct
+        files=list(filter(lambda k: (('nasm.o' not in k) and ('main.o' not in k)), files))
+        
         rm_rf(output)
         cmd([ar, '-rc', output, *files])
 
@@ -699,7 +704,7 @@ def build_webrtc(
                 'use_custom_libcxx=false',
                 'rtc_include_tests=false',
                 'treat_warnings_as_errors=false',
-                'use_glib=false'
+                'use_glib=false',
             ]
             if target == 'raspberry-pi-os_armv6':
                 gn_args += [
@@ -715,6 +720,16 @@ def build_webrtc(
             gn_args += [
                 'target_os="linux"',
                 'rtc_use_pipewire=false',
+                'is_debug=false',
+                'is_clang=true',
+                'use_custom_libcxx_for_host=false',
+                'use_custom_libcxx=false',
+                'rtc_include_tests=false',
+                'treat_warnings_as_errors=false',
+                'use_glib=false',
+                'rtc_build_tools=false',
+                'rtc_build_examples=false',
+                'rtc_enable_protobuf=false',
             ]
         else:
             raise Exception(f'Target {target} is not supported')
