@@ -388,6 +388,8 @@ MULTISTRAP_CONFIGS = {
     ),
     'ubuntu-20.04_armv8': MultistrapConfig(
         config_file=['ubuntu-20.04_armv8', 'arm64.conf'],
+        arch='arm64',
+        triplet='aarch64-linux-gnu'
     ),
     'debian-11_arm64': MultistrapConfig(
         config_file=['debian-11_arm64', 'arm64.conf'],
