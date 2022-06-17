@@ -38,8 +38,3 @@ apt-get -y install \
 # https://github.com/volumio/Build/issues/348#issuecomment-462271607 を参照
 sed -e 's/Apt::Get::AllowUnauthenticated=true/Apt::Get::AllowUnauthenticated=true";\n$config_str .= " -o Acquire::AllowInsecureRepositories=true/' -i /usr/sbin/multistrap
 
-# Ubuntu 18.04 では GLIBCXX_3.4.26 が無いためエラーになったので、
-# 新しい libstdc++6 のパッケージがある場所からインストールする
-add-apt-repository -y ppa:ubuntu-toolchain-r/test
-apt update
-apt-get install -y --only-upgrade libstdc++6
